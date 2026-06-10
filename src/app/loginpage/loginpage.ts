@@ -6,4 +6,20 @@ import { Component } from '@angular/core';
   templateUrl: './loginpage.html',
   styleUrl: './loginpage.css',
 })
-export class Loginpage {}
+export class Loginpage {
+login = true
+
+
+
+loginToggle(){
+  this.login = !this.login
+}
+logIn(){
+
+}
+register(){
+  
+}
+
+
+}

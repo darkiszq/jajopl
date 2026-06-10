@@ -1,1 +1,39 @@
-<p>loginpage works!</p>
+<div class="container-fluid"> 
+    <div class="container-fluid d-flex justify-content-center mb-5 mt-3">
+        <img src="/jajotransparent.png" class="img-fluid w-50" alt="image desc"/>
+    </div>
+    <div class="container-fluid w-25 text-center">
+        @if(login){
+            <h2 class="mb-5"> <b>Zaloguj się!</b></h2>
+            <div class="mb-3">
+                <label for="username"> Nazwa użytkownika</label>
+                <input type="text" class="form-control" name="username" id="username">
+            </div>
+            <div class="mb-3">
+                <label for="password"> Hasło</label>
+                <input type="password" class="form-control" name="password" id="password">
+            </div>
+            <button class="btn btn-danger mb-2 me-2" (click)="logIn()"> 
+                Zaloguj
+            </button>
+            <a class="link-danger" href="#" (click)="loginToggle()">Nie masz konta?</a>
+        }
+        @else {
+            <h2 class="mb-5"> <b>Załóż konto!</b></h2>
+            <div class="mb-3">
+                <label for="username"> Nazwa użytkownika</label>
+                <input type="text" class="form-control" name="username" id="username">
+            </div>
+            <div class="mb-3">
+                <label for="password"> Hasło</label>
+                <input type="password" class="form-control" name="password" id="password">
+            </div>
+            <button class="btn btn-danger mb-2 me-2" (click)="register()"> 
+                Zarejestruj
+            </button>
+            <a class="link-danger" href="#" (click)="loginToggle()">Masz już konto?</a>
+        }
+
+        
+    </div>
+</div>
