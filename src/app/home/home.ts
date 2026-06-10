@@ -1,10 +1,13 @@
 import { Component, inject, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { DatabaseService } from '../database-service';
 import { arrayBuffer } from 'stream/consumers';
+import { FormsModule } from '@angular/forms';
+import { Console } from 'console';
+
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -17,6 +20,9 @@ export class Home {
   userVotes = new Map<number, 'upvote' | 'downvote' | null>()
   expandedComments = new Set<number>()
   userCommentVotes: { [key: string]: 'upvote' | 'downvote' | null } = {}
+  newCommentContent = ""
+
+
 
   async ngOnInit() {
     try{
@@ -77,6 +83,7 @@ export class Home {
     if (this.expandedComments.has(postId)) {
       this.expandedComments.delete(postId)
     } else {
+      this.expandedComments.clear()
       this.expandedComments.add(postId)
     }
     this.cdr.markForCheck()
@@ -130,7 +137,22 @@ export class Home {
       this.userCommentVotes[voteKey] = 'downvote'
     }
     this.cdr.markForCheck()
+  } 
+
+
+  // TUTAJ MUSISZ ZMIENIĆ TO JAK DZIAŁA ID NA MAPOWANIE, BO CIĘ KURWA ZMIECIE Z PLANSZY POTEM JAK BĘDZIESZ BRAŁA DANE Z BAZY DANYCH
+  addComment(id:number){
+    console.log(id)
+    this.posts[id-1].comments.push({
+        id: this.posts[id-1].comments.length,
+        author:"Marcy",
+        content:this.newCommentContent,
+        upvotes: 0,
+        downvotes: 0
+      })
   }
+
+  
 
 
 }

@@ -70,6 +70,11 @@
                         </button>
                       </div>
                     }
+                    <div class="container-fluid">
+                        <label for="commentWritten">Napisz komentarz</label>
+                        <input type="text" class="form-control" name="commentWritten" id="commentWritten" [(ngModel)]="newCommentContent">
+                        <button class="btn btn-danger" (click)="addComment(post.id)"> Wyślij</button>
+                    </div>
                   </div>
                 }
             </div> 

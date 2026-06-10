@@ -38,6 +38,7 @@ export class DatabaseService {
   }]
 
   async getPostsHome(){
+    
     return this.fauxPosts
   }
 
