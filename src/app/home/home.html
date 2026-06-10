@@ -11,8 +11,12 @@
           <a class="nav-link active" aria-current="page" href="#">Dom</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">Dodaj mema</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="#">Wyloguj się</a>
         </li>
+        
       </ul>
       <form class="d-flex" role="search">
         <input class="form-control me-2" type="search" placeholder="Wyszukaj" aria-label="Wyszukaj"/>
@@ -21,6 +25,59 @@
     </div>
   </div>
 </nav>
+<div class="container-fluid d-flex justify-content-center">
+    @if(postsLoaded){
+        @for(post of posts; track post.id; let idx = $index){
+            <div class="card w-50">
+                <img class="card-img-top" src="{{post.src}}" alt="Title" />
+                <div class="card-body">
+                    <h3 class="card-title">{{post.title}}</h3>
+                    <a class="card-text" href="#"> {{post.author}}</a>
+                    <div class="container-fluid mt-3 p-0">
+                    <button 
+                      [class]="userVotes.get(post.id) === 'upvote' ? 'btn btn-success me-2' : 'btn btn-outline-success me-2'" 
+                      (click)="upvotePost(post.id)">
+                      {{post.upvotes}}
+                    </button>
+                    <button 
+                      [class]="userVotes.get(post.id) === 'downvote' ? 'btn btn-danger me-2' : 'btn btn-outline-danger me-2'" 
+                      (click)="downvotePost(post.id)">
+                      {{post.downvotes}}
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-primary"
+                      (click)="toggleComments(post.id)">
+                      {{post.comments.length}}
+                    </button>
+                    </div>
+                </div>
+                @if(expandedComments.has(post.id)) {
+                  <div class="card-footer">
+                    @for(comment of post.comments; track comment.id) {
+                      <div class="mb-3 p-2 border rounded">
+                        <strong>{{comment.author}}</strong>
+                        <p class="mb-2">{{comment.content}}</p>
+                        <button 
+                          [class]="userCommentVotes[getCommentVoteKey(post.id, comment.id)] === 'upvote' ? 'btn btn-success btn-sm me-2' : 'btn btn-outline-success btn-sm me-2'"
+                          (click)="upvoteComment(post.id, comment.id)">
+                          {{comment.upvotes}}
+                        </button>
+                        <button 
+                          [class]="userCommentVotes[getCommentVoteKey(post.id, comment.id)] === 'downvote' ? 'btn btn-danger btn-sm' : 'btn btn-outline-danger btn-sm'"
+                          (click)="downvoteComment(post.id, comment.id)">
+                          {{comment.downvotes}}
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+            </div> 
+        }
+    }
+
+
+</div>
 
 
 
