@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-loginpage',
@@ -8,7 +9,7 @@ import { Component } from '@angular/core';
 })
 export class Loginpage {
 login = true
-
+router = inject(Router)
 
 
 loginToggle(){
@@ -16,9 +17,12 @@ loginToggle(){
 }
 logIn(){
 
+
+  this.router.navigate([''])
 }
 register(){
   
+    this.router.navigate([''])
 }
 
 
