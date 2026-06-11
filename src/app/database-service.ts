@@ -23,17 +23,18 @@ export class DatabaseService {
     author:"Marcy",
   }]
 
-  private fauxProfile=[{
+  private fauxProfiles=[{
     id:1,
     username: "Marcy",
     src:"/images/marcy.png",
+    description:"Kocham króliki i moją żonę",
     comments:[
       {
         id: 1,
         author:"Marcy",
         content:"Ale gupia",
-        upvotes: 0,
-        downvotes: 200
+        upvotes: 200,
+        downvotes: 0
       }
     ]
   }]
@@ -65,6 +66,13 @@ export class DatabaseService {
 
   async addCommentProfile(content:string, profileId : number){
     console.log(`Added comment to profile at id ${profileId}`)
+    this.fauxProfiles[0].comments.push({
+      id: this.fauxProfiles[0].comments.length + 1,
+      author:"Marcy",
+      content:content,
+      upvotes: 0,
+      downvotes: 0
+    })
     return true
   }
   async upvotePost(postId:number){
@@ -83,6 +91,10 @@ export class DatabaseService {
     console.log(`Added downvote to comment at id ${commentId}`)
     return true
   }
+  async getProfile(profileName:string){
 
+    console.log(`My name is ${profileName}`)
+    return this.fauxProfiles[0]
+  }
 
 }

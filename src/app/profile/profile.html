@@ -1,0 +1,54 @@
+<app-navbar></app-navbar>
+
+<div class="container-fluid w-25 d-flex justify-content-center flex-column"> 
+    @if(profileLoaded){
+    <div class="card mb-3" style="max-width: 540px;">
+        <div class="row g-0">
+            <div class="col-md-4">
+            <img src="{{profileData.src}}" class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{profileData.username}}</h5>
+                    <p class="card-text">{{profileData.description}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid mt-3">
+        <button 
+          type="button" 
+          class="btn btn-outline-primary"
+          (click)="toggleComments()">
+          Komentarze ({{profileData.comments?.length || 0}})
+        </button>
+    </div>
+    @if(expandedComments) {
+        <div class="card mt-3">
+          <div class="card-body">
+            @for(comment of profileData.comments; track comment.id) {
+              <div class="mb-3 p-2 border rounded">
+                <a class="text-danger" href="/user?name={{comment.author}}"><strong>{{comment.author}}</strong></a>
+                <p class="mb-2">{{comment.content}}</p>
+                <button 
+                  [class]="userCommentVotes[getCommentVoteKey(comment.id)] === 'upvote' ? 'btn btn-success btn-sm me-2' : 'btn btn-outline-success btn-sm me-2'"
+                  (click)="upvoteComment(comment.id)">
+                  {{comment.upvotes}}
+                </button>
+                <button 
+                  [class]="userCommentVotes[getCommentVoteKey(comment.id)] === 'downvote' ? 'btn btn-danger btn-sm' : 'btn btn-outline-danger btn-sm'"
+                  (click)="downvoteComment(comment.id)">
+                  {{comment.downvotes}}
+                </button>
+              </div>
+            }
+            <div class="container-fluid mt-3">
+                <label for="profileCommentInput">Napisz komentarz</label>
+                <input type="text" class="form-control" name="profileCommentInput" id="profileCommentInput" [(ngModel)]="newCommentContent">
+                <button class="btn btn-danger mt-2" (click)="addComment()">Wyślij</button>
+            </div>
+          </div>
+        </div>
+    }
+    }
+</div>

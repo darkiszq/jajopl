@@ -7,7 +7,7 @@
                 <img class="card-img-top" src="{{post.src}}" alt="Title" />
                 <div class="card-body">
                     <h3 class="card-title">{{post.title}}</h3>
-                    <a class="card-text text-danger" href="#"> {{post.author}}</a>
+                    <a class="card-text text-danger" href="/user?name={{post.author}}"> {{post.author}}</a>
                     <div class="container-fluid mt-3 p-0">
                     <button 
                       [class]="userVotes.get(post.id) === 'upvote' ? 'btn btn-success me-2' : 'btn btn-outline-success me-2'" 
@@ -31,7 +31,7 @@
                   <div class="card-footer">
                     @for(comment of post.comments; track comment.id) {
                       <div class="mb-3 p-2 border rounded">
-                        <a class="text-danger" href="#"> <strong>{{comment.author}}</strong> </a>
+                        <a class="text-danger" href="/user?name={{comment.author}}"> <strong>{{comment.author}}</strong> </a>
                         <p class="mb-2">{{comment.content}}</p>
                         <button 
                           [class]="userCommentVotes[getCommentVoteKey(post.id, comment.id)] === 'upvote' ? 'btn btn-success btn-sm me-2' : 'btn btn-outline-success btn-sm me-2'"
