@@ -3,11 +3,12 @@ import { DatabaseService } from '../database-service';
 import { arrayBuffer } from 'stream/consumers';
 import { FormsModule } from '@angular/forms';
 import { Console } from 'console';
+import { Navbar } from "../navbar/navbar";
 
 
 @Component({
   selector: 'app-home',
-  imports: [FormsModule],
+  imports: [FormsModule, Navbar],
   templateUrl: './home.html',
   styleUrl: './home.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -41,6 +42,7 @@ export class Home {
   }
 
   upvotePost(id : number){
+    this.data.upvotePost(id)
     const post = this.posts.find(p => p.id === id)
     if (!post) return
 
@@ -60,6 +62,7 @@ export class Home {
   }
 
   downvotePost(id:number){
+    this.data.downvotePost(id)
     const post = this.posts.find(p => p.id === id)
     if (!post) return
 
@@ -94,6 +97,7 @@ export class Home {
   }
 
   upvoteComment(postId: number, commentId: number) {
+    this.data.upvoteComment(commentId)
     const post = this.posts.find((p: any) => p.id === postId)
     if (!post || !post.comments) return
 
@@ -117,6 +121,8 @@ export class Home {
   }
 
   downvoteComment(postId: number, commentId: number) {
+    this.data.downvoteComment(commentId)
+
     const post = this.posts.find((p: any) => p.id === postId)
     if (!post || !post.comments) return
 
@@ -140,16 +146,10 @@ export class Home {
   } 
 
 
-  // TUTAJ MUSISZ ZMIENIĆ TO JAK DZIAŁA ID NA MAPOWANIE, BO CIĘ KURWA ZMIECIE Z PLANSZY POTEM JAK BĘDZIESZ BRAŁA DANE Z BAZY DANYCH
-  addComment(id:number){
-    console.log(id)
-    this.posts[id-1].comments.push({
-        id: this.posts[id-1].comments.length,
-        author:"Marcy",
-        content:this.newCommentContent,
-        upvotes: 0,
-        downvotes: 0
-      })
+  async addComment(postId:number){
+    this.data.addCommentPost(this.newCommentContent,postId)
+    this.posts = await this.data.getPostsHome()
+    this.cdr.markForCheck()
   }
 
   
