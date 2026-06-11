@@ -18,8 +18,8 @@
         
       </ul>
       <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Wyszukaj" aria-label="Wyszukaj"/>
-        <button class="btn btn-outline-danger" type="submit">Wyszukaj</button>
+        <input class="form-control me-2" type="search" placeholder="Wyszukaj" aria-label="Wyszukaj" name="search" [(ngModel)]="searchedFor"/>
+        <a class="btn btn-outline-danger" role="button" href="/search?category={{searchedFor}}"> Wyszukaj </a>
       </form>
     </div>
   </div>

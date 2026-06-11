@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ServerTestingModule } from '@angular/platform-server/testing';
+import { arrayBuffer } from 'stream/consumers';
 
 @Injectable({
   providedIn: 'root',
@@ -98,7 +99,11 @@ export class DatabaseService {
   }
 
   async addMeme(formData : any){
-    
+
+  }
+
+  searchPosts(category : string){
+    return this.fauxPosts
   }
 
 }

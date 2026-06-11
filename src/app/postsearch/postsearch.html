@@ -1,0 +1,64 @@
+<div class="container-fluid">
+<app-navbar></app-navbar>
+<div class="container-fluid d-flex justify-content-center">
+    @if(postsLoaded){
+        @for(post of postData; track post.id; let idx = $index){
+            <div class="card w-50">
+                <img class="card-img-top" src="{{post.src}}" alt="Title" />
+                <div class="card-body">
+                    <h3 class="card-title">{{post.title}}</h3>
+                    <a class="card-text text-danger" href="/user?name={{post.author}}"> {{post.author}}</a>
+                    <div class="container-fluid mt-3 p-0">
+                    <button 
+                      [class]="userVotes.get(post.id) === 'upvote' ? 'btn btn-success me-2' : 'btn btn-outline-success me-2'" 
+                      (click)="upvotePost(post.id)">
+                      {{post.upvotes}}
+                    </button>
+                    <button 
+                      [class]="userVotes.get(post.id) === 'downvote' ? 'btn btn-danger me-2' : 'btn btn-outline-danger me-2'" 
+                      (click)="downvotePost(post.id)">
+                      {{post.downvotes}}
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-primary"
+                      (click)="toggleComments(post.id)">
+                      {{post.comments.length}}
+                    </button>
+                    </div>
+                </div>
+                @if(expandedComments.has(post.id)) {
+                  <div class="card-footer">
+                    @for(comment of post.comments; track comment.id) {
+                      <div class="mb-3 p-2 border rounded">
+                        <a class="text-danger" href="/user?name={{comment.author}}"> <strong>{{comment.author}}</strong> </a>
+                        <p class="mb-2">{{comment.content}}</p>
+                        <button 
+                          [class]="userCommentVotes[getCommentVoteKey(post.id, comment.id)] === 'upvote' ? 'btn btn-success btn-sm me-2' : 'btn btn-outline-success btn-sm me-2'"
+                          (click)="upvoteComment(post.id, comment.id)">
+                          {{comment.upvotes}}
+                        </button>
+                        <button 
+                          [class]="userCommentVotes[getCommentVoteKey(post.id, comment.id)] === 'downvote' ? 'btn btn-danger btn-sm' : 'btn btn-outline-danger btn-sm'"
+                          (click)="downvoteComment(post.id, comment.id)">
+                          {{comment.downvotes}}
+                        </button>
+                      </div>
+                    }
+                    <div class="container-fluid">
+                        <label for="commentWritten">Napisz komentarz</label>
+                        <input type="text" class="form-control" name="commentWritten" id="commentWritten" [(ngModel)]="newCommentContent">
+                        <button class="btn btn-danger" (click)="addComment(post.id)"> Wyślij</button>
+                    </div>
+                  </div>
+                }
+            </div> 
+        }
+    }
+
+
+</div>
+
+
+
+</div>

@@ -3,6 +3,7 @@ import { Loginpage } from './loginpage/loginpage';
 import { Home } from './home/home';
 import { Profile } from './profile/profile';
 import { Memeadd } from './memeadd/memeadd';
+import { Postsearch } from './postsearch/postsearch';
 
 export const routes: Routes = [
     {
@@ -20,5 +21,9 @@ export const routes: Routes = [
     {
         path:'meme',
         component: Memeadd
+    },
+    {
+        path:'search',
+        component: Postsearch
     }
 ];
