@@ -1,1 +1,24 @@
-<p>memeadd works!</p>
+<app-navbar></app-navbar>
+<div class="container-fluid d-flex justify-content-center flex-column w-25">
+    <form>
+    <div class="mb-3">
+    <label for="formFile" class="form-label">Dodaj zdjęcie</label>
+    <input class="form-control" type="file" id="formFile" name="formFile" (change)="onFileSelected($event)" accept="image/*" >
+    </div>
+    <div class="mb-3">
+    <label for="title">Tytuł</label>
+    <input class="form-control" type="text" id="title" name="title" [(ngModel)]="title">
+    </div>
+    <div class="mb-3">
+        <label for="exampleDataList" class="form-label">Kategoria</label>
+    <input class="form-control" list="datalistOptions" id="exampleDataList" name="category" placeholder="Pisz aby wyszukać..." [(ngModel)]="category">
+    <datalist id="datalistOptions">
+    <option value="Kot">
+    <option value="Pies">
+    <option value="Czarny humor">
+    </datalist>
+    </div>
+
+    <button class="btn btn-danger" type="reset" (click)="onSubmit()">Prześlij</button>
+    </form>
+</div>

@@ -97,4 +97,8 @@ export class DatabaseService {
     return this.fauxProfiles[0]
   }
 
+  async addMeme(formData : any){
+    
+  }
+
 }
