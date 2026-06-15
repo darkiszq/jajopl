@@ -4,11 +4,16 @@ import { arrayBuffer } from 'stream/consumers';
 import { FormsModule } from '@angular/forms';
 import { Console } from 'console';
 import { Navbar } from "../navbar/navbar";
+import { CookieService } from 'ngx-cookie-service';
+import { Router } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
 
 
 @Component({
   selector: 'app-home',
   imports: [FormsModule, Navbar],
+  providers: [CookieService],
   templateUrl: './home.html',
   styleUrl: './home.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -17,33 +22,68 @@ export class Home {
   data= inject(DatabaseService)
   cdr = inject(ChangeDetectorRef)
   postsLoaded= false
-  posts = Array<any>()
+  posts : Array<any> | undefined 
   userVotes = new Map<number, 'upvote' | 'downvote' | null>()
   expandedComments = new Set<number>()
   userCommentVotes: { [key: string]: 'upvote' | 'downvote' | null } = {}
   newCommentContent = ""
-
-
+  cookieService = inject(CookieService)
+  router = inject(Router)
+  platformId = inject(PLATFORM_ID)
 
   async ngOnInit() {
-    try{
-      this.posts = await this.data.getPostsHome()
-      this.posts.forEach(post => {
-        this.userVotes.set(post.id, null)
-      })
-      this.postsLoaded = true
-      this.cdr.markForCheck()
+    
+    if (isPlatformBrowser(this.platformId)) {
+    const user = this.getCookie('user');
+    console.log("user")
+    if (!user) {
+      this.router.navigate(['/login']);
     }
-    catch(e){
-
     }
 
+    try {
+      this.posts = await this.data.getPostsHome();
+      this.posts?.forEach(post => {
+        for(let comment of post.comments){
+          let voteKey = this.getCommentVoteKey(post.id, comment.id)
+          if(comment.userVote == "upvote"){
+            this.userCommentVotes[voteKey] = 'upvote'
+          }
+          else if(comment.userVote == "downvote"){
+            this.userCommentVotes[voteKey] = 'downvote'
+          }
+        }
+        console.log(`${post.id + post.userVote}`)
+        if(post.userVote=="upvote"){
+        this.userVotes.set(post.id, 'upvote')
+        }
+        else if(post.userVote=="downvote"){
+        this.userVotes.set(post.id, 'downvote')
+        }
+        else{
+        this.userVotes.set(post.id, null);
+        }
+      });
 
+
+      this.postsLoaded = true;
+      this.cdr.markForCheck();
+    } catch (e) {
+      console.error('Error loading posts:', e);
+    }
   }
+
+  getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+  }
+
 
   upvotePost(id : number){
     this.data.upvotePost(id)
-    const post = this.posts.find(p => p.id === id)
+    const post = this.posts?.find(p => p.id === id)
     if (!post) return
 
     const currentVote = this.userVotes.get(id)
@@ -63,7 +103,7 @@ export class Home {
 
   downvotePost(id:number){
     this.data.downvotePost(id)
-    const post = this.posts.find(p => p.id === id)
+    const post = this.posts?.find(p => p.id === id)
     if (!post) return
 
     const currentVote = this.userVotes.get(id)
@@ -98,7 +138,7 @@ export class Home {
 
   upvoteComment(postId: number, commentId: number) {
     this.data.upvoteComment(commentId)
-    const post = this.posts.find((p: any) => p.id === postId)
+    const post = this.posts?.find((p: any) => p.id === postId)
     if (!post || !post.comments) return
 
     const comment = post.comments.find((c: any) => c.id === commentId)
@@ -123,7 +163,7 @@ export class Home {
   downvoteComment(postId: number, commentId: number) {
     this.data.downvoteComment(commentId)
 
-    const post = this.posts.find((p: any) => p.id === postId)
+    const post = this.posts?.find((p: any) => p.id === postId)
     if (!post || !post.comments) return
 
     const comment = post.comments.find((c: any) => c.id === commentId)

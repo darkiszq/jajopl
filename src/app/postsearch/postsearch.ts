@@ -4,10 +4,16 @@ import { DatabaseService } from '../database-service';
 import { ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CookieService } from 'ngx-cookie-service';
+import { Router } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
+
 
 @Component({
   selector: 'app-postsearch',
   imports: [Navbar, FormsModule],
+  providers: [CookieService],
   templateUrl: './postsearch.html',
   styleUrl: './postsearch.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -16,24 +22,57 @@ export class Postsearch {
   data = inject(DatabaseService)
   cdr = inject(ChangeDetectorRef)
   route = inject(ActivatedRoute)
-  postData = Array<any>()
+  postData : Array<any> | undefined
   categorySearched = ""
   postsLoaded = false
   userVotes = new Map<number, 'upvote' | 'downvote' | null>()
   expandedComments = new Set<number>()
   userCommentVotes: { [key: string]: 'upvote' | 'downvote' | null } = {}
   newCommentContent = ""
+  cookieService = inject(CookieService)
+  router = inject(Router)
 
-  async ngOnInit(){
+
+
+
+platformId = inject(PLATFORM_ID)
+
+  async ngOnInit() {
+    
+    if (isPlatformBrowser(this.platformId)) {
+    const user = this.getCookie('user');
+    if (!user) {
+      this.router.navigate(['/login']);
+    }
+    }
+    
+
     console.log(this.route.snapshot.queryParams['category'])
     if(this.route.snapshot.queryParams['category']){
       this.categorySearched = this.route.snapshot.queryParams['category'] || "-1"
       if(this.categorySearched !="-1"){
         this.postData = await this.data.searchPosts(this.categorySearched)
-        this.postData.forEach(post => {
-          this.userVotes.set(post.id, null)
-        })
-        console.log(this.postData)
+        this.postData?.forEach(post => {
+        for(let comment of post.comments){
+          let voteKey = this.getCommentVoteKey(post.id, comment.id)
+          if(comment.userVote == "upvote"){
+            this.userCommentVotes[voteKey] = 'upvote'
+          }
+          else if(comment.userVote == "downvote"){
+            this.userCommentVotes[voteKey] = 'downvote'
+          }
+        }
+        console.log(`${post.id + post.userVote}`)
+        if(post.userVote=="upvote"){
+        this.userVotes.set(post.id, 'upvote')
+        }
+        else if(post.userVote=="downvote"){
+        this.userVotes.set(post.id, 'downvote')
+        }
+        else{
+        this.userVotes.set(post.id, null);
+        }
+        });
         this.postsLoaded = true
         this.cdr.markForCheck()
       }
@@ -45,9 +84,16 @@ export class Postsearch {
 
   }
 
+  getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
+
   upvotePost(id : number){
     this.data.upvotePost(id)
-    const post = this.postData.find(p => p.id === id)
+    const post = this.postData?.find(p => p.id === id)
     if (!post) return
 
     const currentVote = this.userVotes.get(id)
@@ -67,7 +113,7 @@ export class Postsearch {
 
   downvotePost(id:number){
     this.data.downvotePost(id)
-    const post = this.postData.find(p => p.id === id)
+    const post = this.postData?.find(p => p.id === id)
     if (!post) return
 
     const currentVote = this.userVotes.get(id)
@@ -101,7 +147,7 @@ export class Postsearch {
 
   upvoteComment(postId: number, commentId: number) {
     this.data.upvoteComment(commentId)
-    const post = this.postData.find((p: any) => p.id === postId)
+    const post = this.postData?.find((p: any) => p.id === postId)
     if (!post || !post.comments) return
 
     const comment = post.comments.find((c: any) => c.id === commentId)
@@ -126,7 +172,7 @@ export class Postsearch {
   downvoteComment(postId: number, commentId: number) {
     this.data.downvoteComment(commentId)
 
-    const post = this.postData.find((p: any) => p.id === postId)
+    const post = this.postData?.find((p: any) => p.id === postId)
     if (!post || !post.comments) return
 
     const comment = post.comments.find((c: any) => c.id === commentId)

@@ -1,109 +1,309 @@
 import { Injectable } from '@angular/core';
-import { ServerTestingModule } from '@angular/platform-server/testing';
-import { arrayBuffer } from 'stream/consumers';
-
+import { HttpClient } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { CookieService } from 'ngx-cookie-service';
 @Injectable({
   providedIn: 'root',
 })
 export class DatabaseService {
-  private fauxPosts = [{
-    id: 1,
-    title:"testTitle",
-    src:"/images/1.jpg",
-    upvotes: 24,
-    downvotes: 2,
-    comments: [
-      {
-        id: 1,
-        author:"Marcy",
-        content:"Ale gupi",
-        upvotes: 0,
-        downvotes: 200
-      }
-    ],
-    author:"Marcy",
-  }]
+  private http = inject(HttpClient);
+  private cookieService = inject(CookieService);
+  private apiUrl = 'http://localhost:3000';
 
-  private fauxProfiles=[{
-    id:1,
-    username: "Marcy",
-    src:"/images/marcy.png",
-    description:"Kocham króliki i moją żonę",
-    comments:[
-      {
-        id: 1,
-        author:"Marcy",
-        content:"Ale gupia",
-        upvotes: 200,
-        downvotes: 0
-      }
-    ]
-  }]
-
-  async getPostsHome(){
-    
-    return this.fauxPosts
+  private getUserIdFromCookie(): number {
+    const userCookie = this.cookieService.get('user');
+    return userCookie ? parseInt(userCookie, 10) : -1;
   }
 
-  async addCommentPost(content_ : string, postId_:number){
-    console.log(`Added comment to post at id ${postId_}`)
-    let comment = {
-        author:"Marcy", //do zmiany
-        content: content_,
-        upvotes: 0,
-        downvotes: 0,
-        postId : postId_
+  private setCookie(name: string, value: string, days: number = 365): void {
+    this.cookieService.set(name, value, { expires: days, path: '/' });
+  }
+
+  async getPostsHome() {
+    console.log("request is here!!")
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return undefined;
+    }
+    return this.http.post<any[]>(`${this.apiUrl}/posts`, {userId : userId}).toPromise();
+  }
+
+  async addCommentPost(content_: string, postId_: number) {
+    console.log("request is here!!")
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
     }
 
-    this.fauxPosts[0].comments.push({
-      id: 2,
-        author:"Marcy",
-        content:content_,
-        upvotes: 0,
-        downvotes: 0
-    })
-    return true
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/posts/${postId_}/comments`,
+        { userId, content: content_, postId: postId_ }
+      ).toPromise();
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error adding comment to post:', err);
+      return false;
+    }
   }
 
-  async addCommentProfile(content:string, profileId : number){
-    console.log(`Added comment to profile at id ${profileId}`)
-    this.fauxProfiles[0].comments.push({
-      id: this.fauxProfiles[0].comments.length + 1,
-      author:"Marcy",
-      content:content,
-      upvotes: 0,
-      downvotes: 0
-    })
-    return true
-  }
-  async upvotePost(postId:number){
-    console.log(`Added upvote to post at id ${postId}`)
-    return true
-  }
-  async downvotePost(postId:number){
-    console.log(`Added downvote to post at id ${postId}`)
-    return true
-  }
-  async upvoteComment(commentId:number){
-    console.log(`Added upvote to comment at id ${commentId}`)
-    return true
-  }
-  async downvoteComment(commentId:number){
-    console.log(`Added downvote to comment at id ${commentId}`)
-    return true
-  }
-  async getProfile(profileName:string){
+  async addCommentProfile(content: string, profileId: number) {
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
 
-    console.log(`My name is ${profileName}`)
-    return this.fauxProfiles[0]
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/user/${profileId}/comment`,
+        { userId, content }
+      ).toPromise();
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error adding comment to profile:', err);
+      return false;
+    }
   }
 
-  async addMeme(formData : any){
-
+  async getProfileComments(userId: number) {
+    const userIdLogged = this.getUserIdFromCookie();
+    if (userIdLogged === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+    try {
+      return await this.http.post<any[]>(
+        `${this.apiUrl}/user/${userId}/comments`, {userId : userIdLogged}
+      ).toPromise();
+    } catch (err) {
+      console.error('Error fetching profile comments:', err);
+      return [];
+    }
   }
 
-  searchPosts(category : string){
-    return this.fauxPosts
+  async upvotePost(postId: number) {
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/post/${postId}/vote`,
+        { userId, voteType: 'upvote' }
+      ).toPromise();
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error upvoting post:', err);
+      return false;
+    }
   }
 
+  async downvotePost(postId: number) {
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/post/${postId}/vote`,
+        { userId, voteType: 'downvote' }
+      ).toPromise();
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error downvoting post:', err);
+      return false;
+    }
+  }
+
+  async upvoteComment(commentId: number) {
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/comment/${commentId}/vote`,
+        { userId, voteType: 'upvote' }
+      ).toPromise();
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error upvoting comment:', err);
+      return false;
+    }
+  }
+
+  async downvoteComment(commentId: number) {
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/comment/${commentId}/vote`,
+        { userId, voteType: 'downvote' }
+      ).toPromise();
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error downvoting comment:', err);
+      return false;
+    }
+  }
+
+  async upvoteProfileComment(commentId: number) {
+    console.log("upvoted!!")
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/user-comment/${commentId}/vote`,
+        { userId, voteType: 'upvote' }
+      ).toPromise();
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error upvoting profile comment:', err);
+      return false;
+    }
+  }
+
+  async downvoteProfileComment(commentId: number) {
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/user-comment/${commentId}/vote`,
+        { userId, voteType: 'downvote' }
+      ).toPromise();
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error downvoting profile comment:', err);
+      return false;
+    }
+  }
+
+  async getProfile(profileName: string) {
+    const userIdLogged = this.getUserIdFromCookie();
+    if (userIdLogged === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+
+
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/profile/${profileName}`,{userId : userIdLogged}
+      ).toPromise();
+
+      if (response) {
+        return {
+          id: response.id,
+          username: response.username,
+          description: response.description,
+          src: response.profilePicture,
+          stats: response.stats,
+          comments: response.profileComments || []
+        };
+      }
+      return null;
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      return null;
+    }
+  }
+
+  async addMeme(formData: any) {
+    const userId = this.getUserIdFromCookie();
+    if (userId === -1) {
+      console.error('User ID not found in cookie');
+      return false;
+    }
+
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/postadd`,
+        {
+          userId,
+          title: formData.title,
+          categoryName: formData.category,
+          imageBase64: formData.image
+        }
+      ).toPromise();
+      console.log(formData.image)
+      return !!response?.success;
+    } catch (err) {
+      console.error('Error adding meme:', err);
+      return false;
+    }
+  }
+
+  async searchPosts(category: string) {
+    try {
+      let userId_ = this.getCurrentUserId()
+
+      return await this.http.post<any[]>(
+        `${this.apiUrl}/posts/category/${category}`, {userId : userId_}
+      ).toPromise();
+    } catch (err) {
+      console.error('Error searching posts by category:', err);
+      return [];
+    }
+  }
+
+  async register(username: string, password: string, description?: string) {
+    try {
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/register`,
+        { username, password, description }
+      ).toPromise();
+      this.cookieService.set("user", response.userId)
+      return response;
+    } catch (err) {
+      console.error('Error registering:', err);
+      return null;
+    }
+  }
+
+  async login(username: string, password: string) {
+    try {
+      console.log("Calling login endpoint");
+      const response = await this.http.post<any>(
+        `${this.apiUrl}/login`,
+        { username, password }
+      ).toPromise();
+      console.log("Login response:", response);
+      this.cookieService.set("user", response.userId)
+      return response;
+    } catch (err) {
+      console.error('Error logging in:', err);
+      return null;
+    }
+  }
+
+  getCurrentUserId(): number {
+    return this.getUserIdFromCookie();
+  }
+
+  
+
+  logout(): void {
+    this.cookieService.delete("user");
+  }
 }

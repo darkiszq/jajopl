@@ -7,33 +7,36 @@
             <h2 class="mb-5"> <b>Zaloguj się!</b></h2>
             <div class="mb-3">
                 <label for="username"> Nazwa użytkownika</label>
-                <input type="text" class="form-control" name="username" id="username">
+                <input type="text" class="form-control" name="username" id="username" [(ngModel)]="userData.username">
             </div>
             <div class="mb-3">
                 <label for="password"> Hasło</label>
-                <input type="password" class="form-control" name="password" id="password">
+                <input type="password" class="form-control" name="password" id="password" [(ngModel)]="userData.password">
             </div>
             <button class="btn btn-danger mb-2 me-2" (click)="logIn()"> 
                 Zaloguj
             </button>
-            <a class="link-danger" href="#" (click)="loginToggle()">Nie masz konta?</a>
+            <p class="link-danger" (click)="loginToggle()">Nie masz konta?</p>
         }
         @else {
             <h2 class="mb-5"> <b>Załóż konto!</b></h2>
             <div class="mb-3">
                 <label for="username"> Nazwa użytkownika</label>
-                <input type="text" class="form-control" name="username" id="username">
+                <input type="text" class="form-control" name="username" id="username" [(ngModel)]="userData.username">
             </div>
             <div class="mb-3">
                 <label for="password"> Hasło</label>
-                <input type="password" class="form-control" name="password" id="password">
+                <input type="password" class="form-control" name="password" id="password" [(ngModel)]="userData.password">
             </div>
             <button class="btn btn-danger mb-2 me-2" (click)="register()"> 
                 Zarejestruj
             </button>
-            <a class="link-danger" href="#" (click)="loginToggle()">Masz już konto?</a>
+            <p class="link-danger" (click)="loginToggle()">Masz już konto?</p>
         }
 
+        @if(error){
+            <h3 class="text-bg-danger">ZŁE HASŁO LUB NAZWA UŻYTKOWNIKA</h3>
+        }
         
     </div>
 </div>
